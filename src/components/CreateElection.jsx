@@ -34,10 +34,9 @@ function CreateElection() {
             }
 
             // Initialize Web3 provider
-            const provider = new ethers.providers.Web3Provider(window.ethereum);
+            const provider = new ethers.providers.JsonRpcProvider("http://127.0.0.1:8545");
 
             // Request user to connect their account
-            await window.ethereum.request({ method: "eth_requestAccounts" });
 
             // Get signer from the provider
             const signer = provider.getSigner();
