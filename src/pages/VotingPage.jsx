@@ -2,7 +2,9 @@ import React, { useEffect, useState } from "react";
 import { useParams } from "react-router-dom";
 import { ethers } from "ethers";
 import { VotingAddress, VotingAbi } from "../context/constant";
-import { Button } from "@mui/material";
+import { Button, CircularProgress } from "@mui/material";
+
+const rpcProvider = new ethers.providers.JsonRpcProvider("http://127.0.0.1:8545");
 
 function VotingPage() {
     const { id } = useParams();
@@ -12,38 +14,35 @@ function VotingPage() {
     const [electionStatus, setElectionStatus] = useState("");
     const [signerAddress, setSignerAddress] = useState("");
     const [hasVoted, setHasVoted] = useState(false);
+    const [loading, setLoading] = useState(false);
 
-    // Use Web3Provider to connect with MetaMask
-    const initializeProvider = async () => {
-        try {
-            console.log("Initializing provider...");
-            const provider = new ethers.providers.Web3Provider(window.ethereum, "any");
-            await provider.send("eth_requestAccounts", []); // Request accounts permission
-            const signer = provider.getSigner();
+    // Initialize MetaMask
+    const initializeMetaMask = async () => {
+        if (!window.ethereum) throw new Error("MetaMask is not installed. Please install MetaMask and try again.");
+        await window.ethereum.request({ method: "eth_requestAccounts" });
+        const account = window.ethereum.selectedAddress;
 
-            const currentSignerAddress = await signer.getAddress();
-            setSignerAddress(currentSignerAddress);
-            console.log("Using account:", currentSignerAddress);  // Log the signer address
+        // Update address on account switch
+        window.ethereum.on("accountsChanged", (accounts) => {
+            setSignerAddress(accounts[0]);
+        });
 
-            // Listen for account changes and update signerAddress accordingly
-            window.ethereum.on("accountsChanged", (accounts) => {
-                const newSignerAddress = accounts[0];
-                setSignerAddress(newSignerAddress);
-                console.log("Switched to account:", newSignerAddress);  // Log when account is switched
-            });
+        return account;
+    };
 
-            return { provider, signer };
-        } catch (err) {
-            setError("Failed to initialize provider.");
-            console.error("Error initializing provider:", err);
-        }
+    // Get contract using JsonRpcProvider and MetaMask account
+    const getVotingContract = (account) => {
+        const signer = rpcProvider.getSigner(account);
+        return new ethers.Contract(VotingAddress, VotingAbi, signer);
     };
 
     // Fetch election details
     const fetchElectionDetails = async () => {
+        setLoading(true);
         try {
-            const { signer } = await initializeProvider();
-            const contract = new ethers.Contract(VotingAddress, VotingAbi, signer);
+            const contract = new ethers.Contract(VotingAddress, VotingAbi, rpcProvider);
+
+            // Fetch election details
             const election = await contract.getElection(id);
             const fetchedCandidates = await contract.getCandidates(id);
 
@@ -51,10 +50,9 @@ function VotingPage() {
                 name: candidate.name,
                 voteCount: candidate.voteCount.toString(),
             }));
-
             setCandidates(formattedCandidates);
 
-            const currentTime = Math.floor(Date.now() / 1000); // Get current time in seconds
+            const currentTime = Math.floor(Date.now() / 1000);
             if (currentTime < election.startTime.toNumber()) {
                 setElectionStatus("Election has not started yet.");
                 setCanVote(false);
@@ -66,87 +64,96 @@ function VotingPage() {
                 setCanVote(true);
             }
 
-            // Check if the user has already voted
-            const hasUserVoted = await contract.hasVoted(id, signerAddress);
-            setHasVoted(hasUserVoted);
-
+            // Check if user has voted
+            if (signerAddress) {
+                const hasUserVoted = await contract.hasVoted(id, signerAddress);
+                setHasVoted(hasUserVoted);
+            }
         } catch (err) {
             console.error("Error fetching election details:", err);
             setError("Failed to load election details.");
+        } finally {
+            setLoading(false);
         }
     };
 
     // Voting function
     const vote = async (candidateIndex) => {
+        if (loading) return;
         try {
-            const { signer } = await initializeProvider();
-            const contract = new ethers.Contract(VotingAddress, VotingAbi, signer);
+            setLoading(true);
+            setError(null);
 
-            // Log the election ID, candidate index, and signer address
-            console.log("Election ID:", id);
-            console.log("Candidate Index:", candidateIndex);
-            console.log("Signer Address:", signerAddress);
+            // Get active account from MetaMask
+            const account = await initializeMetaMask();
+            console.log("Using account:", account);
 
-            // If the user has already voted, return
-            if (hasVoted) {
-                setError("You have already voted in this election.");
-                return;
-            }
+            // Initialize contract with JsonRpcProvider
+            const contract = getVotingContract(account);
 
-            // Proceed with voting
+            // Submit the transaction
             const tx = await contract.vote(id, candidateIndex, {
-                gasLimit: 3000000,  // You can try removing this if you're relying on MetaMask to handle gas
+                gasLimit: 3000000,
             });
 
-            console.log("Voting transaction:", tx);
-            // Wait for transaction to be mined
+            console.log("Transaction sent:", tx.hash);
             await tx.wait();
-            console.log("Vote successful, transaction hash:", tx.hash);
+            console.log("Transaction confirmed:", tx.hash);
+
+            // Refresh election details
+            fetchElectionDetails();
             setError("Successfully voted!");
-            fetchElectionDetails();  // Refresh election details after voting
         } catch (err) {
             console.error("Error during voting:", err);
-            setError("An unexpected error occurred. Please try again.");
+            setError("An error occurred during voting. Please try again.");
+        } finally {
+            setLoading(false);
         }
     };
 
     // Fetch election details when the component mounts or election id changes
     useEffect(() => {
         fetchElectionDetails();
-    }, [id]);
+    }, [id, signerAddress]);
 
     return (
         <div>
             <h1>Election {id}</h1>
             {error && <p style={{ color: "red" }}>{error}</p>}
-            <p>{electionStatus}</p>
-            {canVote ? (
-                <ul>
-                    {candidates.map((candidate, index) => (
-                        <li key={index}>
-                            {candidate.name}: {candidate.voteCount} votes
-                            <Button
-                                variant="contained"
-                                color="primary"
-                                onClick={() => vote(index)}
-                                style={{ marginLeft: "10px" }}
-                            >
-                                Vote
-                            </Button>
-                        </li>
-                    ))}
-                </ul>
+            {loading ? (
+                <CircularProgress />
             ) : (
-                <p>{hasVoted ? "You have already voted." : "You cannot vote in this election."}</p>
+                <>
+                    <p>{electionStatus}</p>
+                    {canVote ? (
+                        <ul>
+                            {candidates.map((candidate, index) => (
+                                <li key={index}>
+                                    {candidate.name}: {candidate.voteCount} votes
+                                    <Button
+                                        variant="contained"
+                                        color="primary"
+                                        onClick={() => vote(index)}
+                                        style={{ marginLeft: "10px" }}
+                                    >
+                                        Vote
+                                    </Button>
+                                </li>
+                            ))}
+                        </ul>
+                    ) : (
+                        <p>{hasVoted ? "You have already voted." : "You cannot vote in this election."}</p>
+                    )}
+                    <Button
+                        variant="contained"
+                        color="secondary"
+                        onClick={fetchElectionDetails}
+                        style={{ marginTop: "10px" }}
+                    >
+                        Refresh
+                    </Button>
+                </>
             )}
-            <Button
-                variant="contained"
-                color="secondary"
-                onClick={fetchElectionDetails}
-                style={{ marginTop: "10px" }}
-            >
-                Refresh
-            </Button>
         </div>
     );
 }
