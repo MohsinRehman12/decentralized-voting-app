@@ -2,7 +2,7 @@ import React, { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { ethers } from "ethers";
 import { VotingAddress, VotingAbi } from "../context/constant";
-import { Card, CardContent, Typography, Button, CircularProgress } from "@mui/material";
+import { Card, CardContent, Typography, CircularProgress, TextField } from "@mui/material";
 
 const gradients = [
     "linear-gradient(to right, #a8edea, #fed6e3)",
@@ -19,54 +19,72 @@ function ElectionCard() {
     const [error, setError] = useState(null);
     const [loading, setLoading] = useState(true);
     const navigate = useNavigate();
+    const [electionTitleSearch, setElectionTitleSearch] = useState("");
 
+
+
+    //initializeProvider function to initialize the provider, signer, and contract used by methods to interact with the smart contract.
     const initializeProvider = async () => {
         const provider = new ethers.providers.Web3Provider(window.ethereum);
-        await provider.send("eth_requestAccounts", []);  // Request account access
+        await provider.send("eth_requestAccounts", []);
         const signer = provider.getSigner();
         const contract = new ethers.Contract(VotingAddress, VotingAbi, signer);
 
         return { provider, signer, contract };
     };
 
+
+
+
     const fetchElections = async () => {
         try {
+
+            //get contract from provider and 
             const { contract } = await initializeProvider();
             const electionCount = await contract.electionCount();
-            console.log("Total Elections:", electionCount.toString());
 
+            //variable array to store fetched elections
             const fetchedElections = [];
-            const currentTime = Math.floor(Date.now() / 1000); // Current time in UNIX timestamp (seconds)
+
+            //get current time in seconds
+            const currentTime = Math.floor(Date.now() / 1000);
+
 
             for (let i = 0; i < electionCount; i++) {
                 const election = await contract.getElection(i);
                 console.log(`Election ${i}:`, election);
-
-                // Calculate remaining time
+                
+                //get the time left for a certain election
                 const remainingTime = election.endTime.toNumber() - currentTime;
 
+                //fetch the election details and store it in fetchedElections array
                 fetchedElections.push({
                     id: i,
                     title: election.title,
                     startTime: election.startTime.toString(),
                     endTime: election.endTime.toString(),
-                    remainingTime: remainingTime, // Calculate remaining time in seconds
+                    remainingTime: remainingTime,
                 });
             }
 
+            //set the fetched elections to the state
             setElections(fetchedElections);
-            setLoading(false);  // Stop loading when data is fetched
+
+            //stop the mui circular progress loading when the elections are fetched
+            setLoading(false); 
         } catch (err) {
             console.error("Error fetching elections:", err);
             setError("Failed to load elections.");
-            setLoading(false);  // Stop loading if error occurs
+            setLoading(false); 
         }
     };
 
+    //fetchElections each time the page is loaded
     useEffect(() => {
         fetchElections();
     }, []);
 
+    //when card is clicked, navigate to the election page
     const handleCardClick = (electionId) => {
         navigate(`/election/${electionId}`);
     };
@@ -80,13 +98,76 @@ function ElectionCard() {
         return date.toLocaleString();
     };
 
+    const searchElection = async () => {
+        try {
+            setLoading(true);
+            setError(null);
+
+            const { contract } = await initializeProvider();
+            const electionCount = await contract.electionCount();
+            const fetchedElections = [];
+
+            const currentTime = Math.floor(Date.now() / 1000);
+
+            for (let i = 0; i < electionCount; i++) {
+                const election = await contract.getElection(i);
+                console.log(`Election ${i}:`, election);
+
+                const remainingTime = election.endTime.toNumber() - currentTime;
+
+                if (election.title.toLowerCase().includes(electionTitleSearch.toLowerCase())) {
+                    fetchedElections.push({
+                        id: i,
+                        title: election.title,
+                        startTime: election.startTime.toString(),
+                        endTime: election.endTime.toString(),
+                        remainingTime: remainingTime,
+                    });
+                }
+            }
+
+            setElections(fetchedElections);
+            setLoading(false);
+        } catch (err) {
+            console.error("Error searching elections:", err);
+            setError("Failed to search elections.");
+            setLoading(false);
+        }
+    }
+
+    useEffect(() => {
+        searchElection();
+    }, [electionTitleSearch]);
+
+
+
     return (
+
+        //using mui templates for card design to display the fetched elections using mapping
+        <>
+        <TextField 
+
+            type="text" 
+            placeholder="Search election by title" 
+            value={electionTitleSearch} 
+            onChange={(e) => setElectionTitleSearch(e.target.value)} 
+            style={{ 
+                width: "300px", 
+                margin: "auto", 
+                display: "flex",
+                justifyContent: "center", 
+                marginTop: "auto" }}
+        
+        />
+
         <div style={{ display: "flex", flexWrap: "wrap", gap: "20px", justifyContent: "center", marginTop: "20px" }}>
             {loading ? (
                 <CircularProgress style={{ margin: "auto" }} />
             ) : error ? (
                 <p style={{ color: "red" }}>{error}</p>
-            ) : (
+            ) : 
+            (
+                
                 elections.map((election) => (
                     <Card
                         key={election.id}
@@ -100,16 +181,17 @@ function ElectionCard() {
                         }}
                         onClick={() => handleCardClick(election.id)}
                     >
-                        {/* Gradient Header */}
+                        {/* set the background to a randomgradient */}
                         <div
                             style={{
                                 height: "100px",
                                 background: getRandomGradient(),
                                 borderTopLeftRadius: "8px",
                                 borderTopRightRadius: "8px",
+                                transition: "background 0.5s",
                             }}
                         ></div>
-                        {/* Card Content */}
+                        {/* display the actual content of the card istelf */}
                         <CardContent>
                             <Typography variant="h6" style={{ fontWeight: "bold" }}>
                                 {election.title}
@@ -130,6 +212,7 @@ function ElectionCard() {
                 ))
             )}
         </div>
+        </>
     );
 }
 

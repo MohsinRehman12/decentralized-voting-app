@@ -16,13 +16,15 @@ function VotingPage() {
     const [hasVoted, setHasVoted] = useState(false);
     const [loading, setLoading] = useState(false);
 
-    // Initialize MetaMask
+    
+    
+    //check if metamask is installed and if not prompt the user to get it
     const initializeMetaMask = async () => {
         if (!window.ethereum) throw new Error("MetaMask is not installed. Please install MetaMask and try again.");
         await window.ethereum.request({ method: "eth_requestAccounts" });
         const account = window.ethereum.selectedAddress;
 
-        // Update address on account switch
+        //this listens for when the user switches an account on metamask
         window.ethereum.on("accountsChanged", (accounts) => {
             setSignerAddress(accounts[0]);
         });
@@ -30,7 +32,7 @@ function VotingPage() {
         return account;
     };
 
-    // Get contract using JsonRpcProvider and MetaMask account
+    // get the contract details using the abi and address from the solidity file
     const getVotingContract = (account) => {
         const signer = rpcProvider.getSigner(account);
         return new ethers.Contract(VotingAddress, VotingAbi, signer);
@@ -71,7 +73,6 @@ function VotingPage() {
             }
         } catch (err) {
             console.error("Error fetching election details:", err);
-            setError("Failed to load election details.");
         } finally {
             setLoading(false);
         }
@@ -119,7 +120,6 @@ function VotingPage() {
     return (
         <div>
             <h1>Election {id}</h1>
-            {error && <p style={{ color: "red" }}>{error}</p>}
             {loading ? (
                 <CircularProgress />
             ) : (
@@ -144,14 +144,7 @@ function VotingPage() {
                     ) : (
                         <p>{hasVoted ? "You have already voted." : "You cannot vote in this election."}</p>
                     )}
-                    <Button
-                        variant="contained"
-                        color="secondary"
-                        onClick={fetchElectionDetails}
-                        style={{ marginTop: "10px" }}
-                    >
-                        Refresh
-                    </Button>
+                    
                 </>
             )}
         </div>

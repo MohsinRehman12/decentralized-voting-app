@@ -1,6 +1,17 @@
 import React, { useState } from "react";
 import { ethers } from "ethers";
 import { VotingAddress, VotingAbi } from "../context/constant";
+import { 
+    TextField, 
+    Button, 
+    Typography, 
+    Box, 
+    Alert, 
+    Stack, 
+    Container,
+    Grid2 
+ } from "@mui/material";
+import { deepPurple, grey } from "@mui/material/colors";
 
 function CreateElection() {
     const [title, setTitle] = useState("");
@@ -15,14 +26,14 @@ function CreateElection() {
             setStatus("Creating election...");
             setError(null);
 
-            // Check if window.ethereum is available (MetaMask)
+            // Check if MetaMask is available
             if (typeof window.ethereum === "undefined") {
                 setError("MetaMask is not installed. Please install MetaMask and try again.");
                 setStatus("");
                 return;
             }
 
-            // Initialize Web3 provider using MetaMask
+            // Initialize Web3 provider
             const provider = new ethers.providers.Web3Provider(window.ethereum);
 
             // Request user to connect their account
@@ -64,54 +75,58 @@ function CreateElection() {
     };
 
     return (
-        <div>
-            <h1>Create New Election</h1>
-            {status && <p style={{ color: "green" }}>{status}</p>}
-            {error && <p style={{ color: "red" }}>{error}</p>}
-            <div>
-                <label>
-                    Election Title:
-                    <input
-                        type="text"
+        <Container maxWidth="sm" sx={{ mt: 5 }}>
+            <Typography variant="h4" gutterBottom>
+                Create New Election
+            </Typography>
+            {status && <Alert severity="success" sx={{ mb: 2 }}>{status}</Alert>}
+            {error && <Alert severity="error" sx={{ mb: 2 }}>{error}</Alert>}
+
+            <Box component="form">
+                <Grid2 spacing={3}>
+                    <TextField
+                        margin="normal"
+                        label="Election Title"
+                        fullWidth
                         value={title}
                         onChange={(e) => setTitle(e.target.value)}
                         placeholder="Enter election title"
                     />
-                </label>
-            </div>
-            <div>
-                <label>
-                    Candidates (comma-separated):
-                    <input
-                        type="text"
+                    <TextField
+                    
+                        margin="normal"
+                        label="Candidates (comma-separated)"
+                        fullWidth
                         value={candidates}
                         onChange={(e) => setCandidates(e.target.value)}
                         placeholder="Enter candidates (e.g., Alice, Bob, Charlie)"
                     />
-                </label>
-            </div>
-            <div>
-                <label>
-                    Start Time:
-                    <input
+                    <TextField
+                        margin="normal"
                         type="datetime-local"
+                        
+                        fullWidth
                         value={startTime}
                         onChange={(e) => setStartTime(e.target.value)}
                     />
-                </label>
-            </div>
-            <div>
-                <label>
-                    End Time:
-                    <input
+                    <TextField
+                        margin="normal"
                         type="datetime-local"
+                        fullWidth
                         value={endTime}
                         onChange={(e) => setEndTime(e.target.value)}
                     />
-                </label>
-            </div>
-            <button onClick={handleCreateElection}>Create Election</button>
-        </div>
+                    <Button
+                        variant="contained"
+                        color={ "primary"}
+                        fullWidth
+                        onClick={handleCreateElection}
+                    >
+                        Create Election
+                    </Button>
+                </Grid2>
+            </Box>
+        </Container>
     );
 }
 
