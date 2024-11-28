@@ -1,70 +1,47 @@
-# Getting Started with Create React App
+# Polls: A decentralized Voting Application
 
-This project was bootstrapped with [Create React App](https://github.com/facebook/create-react-app).
+Polls is a decentralized voting web application, developed on blockchain technology. It uses smart contracts and technologies such as MetaMask for authentication and secure voting. This system is designed to be rigid and immune to tampering for electios and polls in general.
 
-## Available Scripts
+### Note: Before downloading the Repository please have The MetaMask Chrome Plugin installed.
 
-In the project directory, you can run:
 
-### `npm start`
+## Getting Started
 
-Runs the app in the development mode.\
-Open [http://localhost:3000](http://localhost:3000) to view it in your browser.
+### 1. Clone the git repositroy
+git clone https://github.com/MohsinRehman12/decentralized-voting-app.git
 
-The page will reload when you make changes.\
-You may also see any lint errors in the console.
+### 2. Navigate to the project directory and Install Dependencies
+cd decentralized-voting-app
+npm install
 
-### `npm test`
+### 3. Add Hardhat Network To Metamask with the Setting shown below
+![image](https://github.com/user-attachments/assets/befeea3a-618b-43a2-80bf-0df14db793f1)
+![image](https://github.com/user-attachments/assets/eb38ba8e-a0f6-4a36-94ad-39eb6febdd0e)
 
-Launches the test runner in the interactive watch mode.\
-See the section about [running tests](https://facebook.github.io/create-react-app/docs/running-tests) for more information.
 
-### `npm run build`
+### 4. Compile hardhat files and then Local Etherum server
 
-Builds the app for production to the `build` folder.\
-It correctly bundles React in production mode and optimizes the build for the best performance.
+cd decentralized-voting-app
+npx hardhat compile
+npx hardhat node
 
-The build is minified and the filenames include the hashes.\
-Your app is ready to be deployed!
+### 5. Copy the private key for accounts given in hardhat nodes output to metamask, and switch to one of them
+![image](https://github.com/user-attachments/assets/d414dccd-4853-4a98-b188-f861f788ba32)
 
-See the section about [deployment](https://facebook.github.io/create-react-app/docs/deployment) for more information.
+### 6. Run the deploy the contract and copy the address of the contract from the output
+cd decentralized-voting-app
+npx hardhat run ignition/modules/deploy.js --network localhost
 
-### `npm run eject`
+![image](https://github.com/user-attachments/assets/204467ad-2afe-4b99-ba39-acf7066b2a2e)
 
-**Note: this is a one-way operation. Once you `eject`, you can't go back!**
+### 7. Go to context/constants.js and copy the address there as show below
 
-If you aren't satisfied with the build tool and configuration choices, you can `eject` at any time. This command will remove the single build dependency from your project.
+![image](https://github.com/user-attachments/assets/b843883c-8266-4462-ab76-4af0083b960d)
 
-Instead, it will copy all the configuration files and the transitive dependencies (webpack, Babel, ESLint, etc) right into your project so you have full control over them. All of the commands except `eject` will still work, but they will point to the copied scripts so you can tweak them. At this point you're on your own.
+### 8. Run the application using npm start and on metamask ensure each account is connected to Localhost:3000
+cd decentralized-voting-app
+npm start
 
-You don't have to ever use `eject`. The curated feature set is suitable for small and middle deployments, and you shouldn't feel obligated to use this feature. However we understand that this tool wouldn't be useful if you couldn't customize it when you are ready for it.
+![image](https://github.com/user-attachments/assets/5ce80e2c-7276-402e-b234-ab72fe983dc5)
 
-## Learn More
 
-You can learn more in the [Create React App documentation](https://facebook.github.io/create-react-app/docs/getting-started).
-
-To learn React, check out the [React documentation](https://reactjs.org/).
-
-### Code Splitting
-
-This section has moved here: [https://facebook.github.io/create-react-app/docs/code-splitting](https://facebook.github.io/create-react-app/docs/code-splitting)
-
-### Analyzing the Bundle Size
-
-This section has moved here: [https://facebook.github.io/create-react-app/docs/analyzing-the-bundle-size](https://facebook.github.io/create-react-app/docs/analyzing-the-bundle-size)
-
-### Making a Progressive Web App
-
-This section has moved here: [https://facebook.github.io/create-react-app/docs/making-a-progressive-web-app](https://facebook.github.io/create-react-app/docs/making-a-progressive-web-app)
-
-### Advanced Configuration
-
-This section has moved here: [https://facebook.github.io/create-react-app/docs/advanced-configuration](https://facebook.github.io/create-react-app/docs/advanced-configuration)
-
-### Deployment
-
-This section has moved here: [https://facebook.github.io/create-react-app/docs/deployment](https://facebook.github.io/create-react-app/docs/deployment)
-
-### `npm run build` fails to minify
-
-This section has moved here: [https://facebook.github.io/create-react-app/docs/troubleshooting#npm-run-build-fails-to-minify](https://facebook.github.io/create-react-app/docs/troubleshooting#npm-run-build-fails-to-minify)
