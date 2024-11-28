@@ -58,7 +58,7 @@ const DashboardLayout = ({ children }) => {
 
             <Typography  variant="h5" noWrap>
 
-                Polls
+                Choices
 
             </Typography>
 

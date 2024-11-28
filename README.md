@@ -1,6 +1,6 @@
-# Polls: A decentralized Voting Application
+# Choices: A decentralized Voting Application
 
-Polls is a decentralized voting web application, developed on blockchain technology. It uses smart contracts and technologies such as MetaMask for authentication and secure voting. This system is designed to be rigid and immune to tampering for electios and polls in general.
+Choices is a decentralized voting web application, developed on blockchain technology. It uses smart contracts and technologies such as MetaMask for authentication and secure voting. This system is designed to be rigid and immune to tampering for electios and polls in general.
 
 ### Note: Before downloading the Repository please have The MetaMask Chrome Plugin installed.
 
