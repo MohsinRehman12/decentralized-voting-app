@@ -56,16 +56,16 @@ const DashboardLayout = ({ children }) => {
 
             </IconButton>
 
-            <Typography variant="h5" noWrap>
+            <Typography  variant="h5" noWrap>
 
-                Decentralized Voting App
+                Polls
 
             </Typography>
 
             </Toolbar>
         </AppBar>
 
-        {/* The drawer or sidebar component used form MUI toolpad Dashboard*/}
+        {/* The drawer/ sidebar component used form MUI toolpad Dashboard*/}
         <Drawer
             variant="persistent"
             open={drawerOpen}
@@ -91,7 +91,7 @@ const DashboardLayout = ({ children }) => {
             </List>
         </Drawer>
 
-        {/* Main content of pages to be stored under toolbar and exures that the drawer does not conflict */}
+        {/* this box ensures page contents dont conflict with bar contentes */}
         <Box
             component="main"
             sx={

@@ -20,6 +20,18 @@ function ElectionCard() {
     const [loading, setLoading] = useState(true);
     const navigate = useNavigate();
     const [electionTitleSearch, setElectionTitleSearch] = useState("");
+    const [isOvertime, setIsOvertime] = useState(false);
+    const [winner, setWinner] = useState("");
+
+    const getWinner = async (electionId) => {
+        try {
+            const { contract } = await initializeProvider();
+            const winner = await contract.getWinner(electionId);
+            setWinner(winner);
+        } catch (err) {
+            console.error("Error getting winner:", err);
+        }
+    };
 
 
 
