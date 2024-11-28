@@ -8,6 +8,7 @@ const rpcProvider = new ethers.providers.JsonRpcProvider("http://127.0.0.1:8545"
 
 function VotingPage() {
     const { id } = useParams();
+    const [electionName, setElectionName] = useState("");
     const [candidates, setCandidates] = useState([]);
     const [error, setError] = useState(null);
     const [canVote, setCanVote] = useState(false);
@@ -28,9 +29,13 @@ function VotingPage() {
 
         //this listens for when the user switches an account on metamask
         window.ethereum.on("accountsChanged", (accounts) => {
-            setSignerAddress(accounts[0]);
+            if (accounts.length > 0) {
+                setSignerAddress(accounts[0]);
+            } else {
+                setSignerAddress(null);
+            }
         });
-
+        setSignerAddress(account);
         return account;
     };
 
@@ -54,7 +59,7 @@ function VotingPage() {
                 voteCount: candidate.voteCount.toString(),
             }));
             setCandidates(formattedCandidates);
-
+            setElectionName(election.title);
             const currentTime = Math.floor(Date.now() / 1000);
             if (currentTime < election.startTime.toNumber()) {
                 setElectionStatus("Election has not started yet.");
@@ -107,6 +112,14 @@ function VotingPage() {
             // refresh the election detals
             fetchElectionDetails();
             setError("Successfully voted!");
+
+            if(signerAddress) {
+                const hasUserVoted = await contract.hasVoted(id, signerAddress);
+                setHasVoted(hasUserVoted);
+                if (hasUserVoted) {
+                    setError("You have already voted.");
+                }
+            }
         } catch (err) {
             console.error("Error during voting:", err);
         } finally {
@@ -137,11 +150,12 @@ function VotingPage() {
     useEffect(() => {
         fetchElectionDetails();
     }, [id, signerAddress]);
+    
 
     return (
         <div>
             {error && <p style={{ color: "red" }}>{error}</p>}
-            <h1>Election {id}</h1>
+            <h1>Election: {electionName}</h1>
             {loading ? (
                 <CircularProgress />
             ) : (
@@ -149,7 +163,6 @@ function VotingPage() {
                 
                     
                     <p>{electionStatus}</p>
-
                     {/* display the winner and election information when it has ended */}
                     {electionStatus === "Election has ended." && (
                         <>
@@ -196,8 +209,9 @@ function VotingPage() {
                                         color="primary"
                                         onClick={() => vote(index)}
                                         style={{ marginLeft: "10px" }}
+                                        disabled={hasVoted}
                                     >
-                                        Vote
+                                        {hasVoted ? "Voted Already" : "Vote"}
                                     </Button>
                                 </li>
                             ))}
