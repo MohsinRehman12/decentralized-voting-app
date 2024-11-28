@@ -12,28 +12,30 @@ async function main() {
     await multiElection.deployed();
     console.log("MultiElection contract deployed to:", multiElection.address);
 
-    // Adding 3 elections dynamically
+    // Adding 3 elections dynamically one that starts later, and 2 running immidiately
     const elections = [
         {
             title: "Presidential Election",
-            candidates: ["Alice", "Bob", "Charlie"],
-            startTime: Math.floor(Date.now() / 1000) + 60, // Starts in 1 minute
-            endTime: Math.floor(Date.now() / 1000) + 600, // Ends in 10 minutes
+            candidates: ["Huzaifa", "Hanzalla", "Hanzalah", "Mohsin"],
+            startTime: Math.floor(Date.now() / 1000) + 60, 
+            endTime: Math.floor(Date.now() / 1000) + 600, 
         },
         {
-            title: "City Council Election",
-            candidates: ["David", "Eve", "Frank"],
-            startTime: Math.floor(Date.now() / 1000), // Starts in 1 minute
-            endTime: Math.floor(Date.now() / 1000) + 600, // Ends in 10 minutes
+            title: "City Council Polls",
+            candidates: ["John", "Bill", "Bert"],
+            startTime: Math.floor(Date.now() / 1000), 
+            endTime: Math.floor(Date.now() / 1000) + 600, 
         },
         {
-            title: "School Board Election",
-            candidates: ["Grace", "Hank", "Ivy"],
-            startTime: Math.floor(Date.now() / 1000), // Starts in 1 minute
-            endTime: Math.floor(Date.now() / 1000) + 600, // Ends in 10 minutes
+            title: "Board Of Directors",
+            candidates: ["Huzaifa", "Mohsin", "Hanzallah"],
+            startTime: Math.floor(Date.now() / 1000), 
+            endTime: Math.floor(Date.now() / 1000) + 600, 
         },
     ];
 
+
+    // Create the elections
     for (let i = 0; i < elections.length; i++) {
         const election = elections[i];
         const tx = await multiElection.createElection(
