@@ -14,16 +14,17 @@ git clone https://github.com/MohsinRehman12/decentralized-voting-app.git
 cd decentralized-voting-app
 npm install
 
-### 3. Add Hardhat Network To Metamask with the Setting shown below
-![image](https://github.com/user-attachments/assets/befeea3a-618b-43a2-80bf-0df14db793f1)
-![image](https://github.com/user-attachments/assets/eb38ba8e-a0f6-4a36-94ad-39eb6febdd0e)
-
-
-### 4. Compile hardhat files and then Local Etherum server
+### 3. Compile hardhat files and then Local Etherum server
 
 cd decentralized-voting-app
 npx hardhat compile
 npx hardhat node
+
+
+### 4. Add Hardhat Network To Metamask with the Setting shown below
+![image](https://github.com/user-attachments/assets/befeea3a-618b-43a2-80bf-0df14db793f1)
+![image](https://github.com/user-attachments/assets/eb38ba8e-a0f6-4a36-94ad-39eb6febdd0e)
+
 
 ### 5. Copy the private key for accounts given in hardhat nodes output to metamask, and switch to one of them
 ![image](https://github.com/user-attachments/assets/d414dccd-4853-4a98-b188-f861f788ba32)
